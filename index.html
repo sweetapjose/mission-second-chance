@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mission: Second Chance</title>
+
+    <meta
+        name="description"
+        content="Design a spacecraft, manage a mission, and replay one engineering decision to discover its consequences."
+    >
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="game.js" defer></script>
+    <script src="replay.js" defer></script>
+    <script src="save.js" defer></script>
+
+    <style>
+        .science-panel {
+            margin-top: 24px;
+        }
+
+        .science-panel a {
+            color: #75e8f3;
+            text-underline-offset: 4px;
+        }
+
+        .science-panel details {
+            margin-top: 16px;
+            padding: 16px;
+            background: #0b1525;
+            border: 1px solid #293950;
+            border-radius: 10px;
+        }
+
+        .science-panel summary {
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .science-panel summary:focus-visible {
+            outline: 3px solid #36d6e7;
+            outline-offset: 5px;
+        }
+
+        .science-panel li {
+            margin-bottom: 10px;
+        }
+
+        .science-panel code {
+            overflow-wrap: anywhere;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <a class="brand" href="./">
+            <span class="brand-icon">✦</span>
+            SECOND CHANCE
+        </a>
+
+        <span class="status">MISSION DESIGN LAB</span>
+    </header>
+
+    <main>
+        <section class="intro">
+            <p class="eyebrow">BUILD. LAUNCH. LEARN. TRY AGAIN.</p>
+
+            <h1>
+                One mission.<br>
+                <span>Every decision matters.</span>
+            </h1>
+
+            <p class="intro-text">
+                Build a satellite to observe flooding.
+                Balance what you want to discover against what your
+                spacecraft can carry, power, and afford.
+            </p>
+        </section>
+
+        <section class="briefing">
+            <div>
+                <p class="eyebrow">MISSION 01 / MONSOON WATCH</p>
+
+                <h2>See through the storm.</h2>
+
+                <p>
+                    Return useful flood observations while managing
+                    clouds, limited energy, and communication windows.
+                    Then change one component and test its consequences.
+                </p>
+            </div>
+
+            <div class="briefing-budget">
+                <span>DESIGN BUDGET</span>
+                <strong>100</strong>
+                <span>fictional mission credits</span>
+            </div>
+        </section>
+
+        <div class="workspace">
+            <section class="panel">
+                <p class="eyebrow">01 / CONFIGURE</p>
+                <h2>Build your spacecraft</h2>
+
+                <label for="instrument">Scientific instrument</label>
+                <select id="instrument">
+                    <option value="optical">Optical camera</option>
+                    <option value="radar">Imaging radar</option>
+                    <option value="both">Camera + radar</option>
+                </select>
+                <p class="help" id="instrument-help"></p>
+
+                <label for="solar">Solar array</label>
+                <select id="solar">
+                    <option value="compact">Compact array</option>
+                    <option value="large">Large array</option>
+                </select>
+                <p class="help" id="solar-help"></p>
+
+                <label for="battery">Battery</label>
+                <select id="battery">
+                    <option value="standard">Standard battery</option>
+                    <option value="extended">Extended battery</option>
+                </select>
+                <p class="help" id="battery-help"></p>
+
+                <label for="orbit">Mission orbit</label>
+                <select id="orbit">
+                    <option value="regional">Regional low Earth orbit</option>
+                    <option value="polar">Polar low Earth orbit</option>
+                    <option value="high">Higher Earth orbit</option>
+                </select>
+                <p class="help" id="orbit-help"></p>
+
+                <label for="launcher">Launch vehicle</label>
+                <select id="launcher">
+                    <option value="swift">Swift — small launcher</option>
+                    <option value="atlas">Atlas — medium launcher</option>
+                </select>
+                <p class="help" id="launcher-help"></p>
+
+                <button id="reset" class="secondary" type="button">
+                    Reset design
+                </button>
+            </section>
+
+            <section class="panel spacecraft-panel">
+                <div class="visual-heading">
+                    <div>
+                        <p class="eyebrow">02 / ASSEMBLY VIEW</p>
+                        <h2>Your spacecraft</h2>
+                    </div>
+
+                    <span class="tag">LIVE</span>
+                </div>
+
+                <div class="space-scene">
+                    <div class="orbit-ring"></div>
+
+                    <div
+                        class="satellite"
+                        id="satellite"
+                        role="img"
+                        aria-label="Satellite with solar panels"
+                    >
+                        <div class="solar-wing"></div>
+
+                        <div class="satellite-body">
+                            <span class="satellite-label">SC–01</span>
+                            <div class="camera"></div>
+                            <div class="radar" id="radar-dish"></div>
+                        </div>
+
+                        <div class="solar-wing"></div>
+                    </div>
+
+                    <div class="earth"></div>
+
+                    <span class="scene-caption">
+                        CONCEPT VIEW · NOT TO SCALE
+                    </span>
+                </div>
+
+                <div class="insight">
+                    <p class="eyebrow">ENGINEERING INSIGHT</p>
+                    <p id="insight"></p>
+                </div>
+            </section>
+
+            <section class="panel">
+                <p class="eyebrow">03 / DESIGN CHECK</p>
+                <h2>Resource dashboard</h2>
+
+                <div class="metric">
+                    <div>
+                        <span>Budget</span>
+                        <strong id="cost-value"></strong>
+                    </div>
+
+                    <progress
+                        id="cost-bar"
+                        max="100"
+                        aria-label="Budget usage"
+                    ></progress>
+                </div>
+
+                <div class="metric">
+                    <div>
+                        <span>Launch mass</span>
+                        <strong id="mass-value"></strong>
+                    </div>
+
+                    <progress
+                        id="mass-bar"
+                        max="100"
+                        aria-label="Launch mass usage"
+                    ></progress>
+                </div>
+
+                <div class="stat-row">
+                    <span>Sunlit generation</span>
+                    <strong id="generation-value"></strong>
+                </div>
+
+                <div class="stat-row">
+                    <span>Observation power</span>
+                    <strong id="load-value"></strong>
+                </div>
+
+                <div class="stat-row">
+                    <span>Battery energy</span>
+                    <strong id="energy-value"></strong>
+                </div>
+
+                <div class="stat-row">
+                    <span>Instrument data rate</span>
+                    <strong id="data-value"></strong>
+                </div>
+
+                <div
+                    id="feedback"
+                    class="feedback"
+                    aria-live="polite"
+                ></div>
+
+                <p class="help">
+                    Launch checks cover budget, mass, and orbit compatibility.
+                    Mission Control tests operation and data delivery.
+                </p>
+            </section>
+        </div>
+
+        <section class="panel science-panel">
+            <p class="eyebrow">SCIENCE / SOURCES / ASSUMPTIONS</p>
+
+            <h2>Understand the engineering.</h2>
+
+            <p>
+                This game teaches relationships between mission decisions.
+                Its numerical specifications are educational assumptions,
+                not measurements of real spacecraft.
+            </p>
+
+            <details>
+                <summary>Why choose radar during cloudy weather?</summary>
+
+                <p>
+                    NASA explains that the NASA–ISRO NISAR mission uses
+                    radar to observe Earth's surface through clouds
+                    and in darkness.
+                </p>
+
+                <p>
+                    In our game, cloudy turns reduce optical observation
+                    quality. Radar avoids that cloud penalty.
+                    The exact quality factors are fictional balancing values.
+                </p>
+
+                <a
+                    href="https://www.nasa.gov/news-release/nasa-isro-satellite-lifts-off-to-track-earths-changing-surfaces/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Read NASA's NISAR mission explanation
+                </a>
+            </details>
+
+            <details>
+                <summary>Why does collecting more data create problems?</summary>
+
+                <p>
+                    NASA's small-spacecraft communications guidance
+                    describes trade-offs among data rate, power consumption,
+                    and mass.
+                </p>
+
+                <p>
+                    In our game, observations fill limited storage.
+                    Sending them to Earth requires a contact window and
+                    transmitter power. Data still onboard does not count
+                    toward the delivery objective.
+                </p>
+
+                <a
+                    href="https://www.nasa.gov/smallsat-institute/sst-soa/soa-communications/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Read NASA's spacecraft communications guidance
+                </a>
+            </details>
+
+            <details>
+                <summary>How does the battery calculation work?</summary>
+
+                <p>
+                    Power is measured in watts. Stored energy is measured
+                    in watt-hours. Each action lasts five simulated minutes.
+                </p>
+
+                <p>
+                    <code>
+                        Energy change = (generation - consumption) × 5 / 60
+                    </code>
+                </p>
+
+                <p>
+                    For example, a 60 W power deficit lasting five minutes
+                    consumes 5 Wh. Battery energy cannot exceed its capacity.
+                    An action that exhausts the battery ends the mission.
+                </p>
+            </details>
+
+            <details>
+                <summary>What is simplified or not yet modelled?</summary>
+
+                <ul>
+                    <li>
+                        Hardware specifications, prices, launcher capacities,
+                        and science scores are fictional.
+                    </li>
+
+                    <li>
+                        Contact windows, target passes, weather, and eclipses
+                        are scripted. No orbital trajectory is calculated.
+                    </li>
+
+                    <li>
+                        Eclipse controls solar generation. Target illumination
+                        is not modelled separately, so an optical observation
+                        can still be offered during a spacecraft eclipse.
+                    </li>
+
+                    <li>
+                        Battery charging is idealised: efficiency losses,
+                        temperature, ageing, and charging-rate limits
+                        are not modelled.
+                    </li>
+
+                    <li>
+                        A one-hour operations exercise does not estimate
+                        a spacecraft's full service lifetime.
+                    </li>
+
+                    <li>
+                        NASA publications support the educational explanations.
+                        The game does not download or analyse satellite imagery.
+                    </li>
+                </ul>
+            </details>
+
+            <details>
+                <summary>How does Second Chance make a fair comparison?</summary>
+
+                <p>
+                    The game records your actions. You can change one
+                    instrument, solar array, or battery and replay them.
+                    Orbit, launcher, and scheduled external conditions
+                    remain unchanged.
+                </p>
+
+                <p>
+                    If an action becomes unavailable, the replay substitutes
+                    conservation and reports the substitution. A battery
+                    failure can end the replay early.
+                </p>
+            </details>
+
+            <details>
+                <summary>Credits and development tools</summary>
+
+                <p>
+                    Developed with HTML, CSS, and JavaScript using VS Code.
+                    ChatGPT assisted with planning, code generation,
+                    explanations, and debugging. The participant performed
+                    the browser checks described in the README.
+                </p>
+
+                <p>
+                    Spacecraft and Earth illustrations are drawn with CSS.
+                    This project is an independent educational prototype;
+                    it is not a NASA operational tool or endorsed product.
+                </p>
+            </details>
+        </section>
+
+        <footer>
+            MISSION: SECOND CHANCE — an educational mission-design prototype.
+            Scientific references and model assumptions are explained above.
+        </footer>
+    </main>
+</body>
+</html>
